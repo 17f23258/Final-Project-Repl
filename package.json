@@ -1,0 +1,16 @@
+{
+	"name": "kaboom-env",
+	"dependencies": {
+		"@replit/database": "^2.0.2",
+		"crypto": "^1.0.1",
+		"esbuild": "^0.15.10",
+		"express": "^4.18.1",
+		"kaboom": "^3000.0.3",
+		"net": "^1.0.2",
+		"stacktrace-js": "^2.0.2",
+		"stream": "^0.0.2",
+		"tls": "^0.0.1",
+		"ws": "^8.13.0",
+		"zlib": "^1.0.5"
+	}
+}
