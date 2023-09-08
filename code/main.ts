@@ -136,12 +136,12 @@ scene("practice", () => {
   }
 
   const angle = add([            //UI for displaying the angle of player
-    text(Math.floor(bean.angle)),
+    text(Math.floor(bean.angle).toString()),
     pos(24, 24)
   ])
 
   const power = add([          //UI to display power of the shot
-    text(Math.floor(bean.power)),
+    text(Math.floor(bean.power).toString()),
     pos(100, 24)
   ])
 
@@ -153,8 +153,8 @@ scene("practice", () => {
   })
 
   onUpdate(() => {
-    angle.text = Math.abs(Math.floor(bean.angle))  //Update player angle UI
-    power.text = Math.floor(bean.power)
+    angle.text = Math.abs(Math.floor(bean.angle)).toString()  //Update player angle UI
+    power.text = Math.floor(bean.power).toString()
   })
 
   let rotationSpeed = bean.SPEED_HIGH
