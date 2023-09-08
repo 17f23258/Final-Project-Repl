@@ -4144,29 +4144,26 @@ vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
   }, "default");
 
   // code/terrain-generate.js
+  var Terrain = {
+    points: [],
+    seedTerrain: function() {
+      for (let w = 0; w < WIDTH; w++) {
+        this.points[w] = Math.floor(Math.random() * 1080);
+      }
+    },
+    interpolateLinear: function(array) {
+    }
+  };
   var drawTerrain = /* @__PURE__ */ __name(() => {
-    for (let w = 0; w < WIDTH; w += 3) {
+    for (let point = 0; point < WIDTH; point += 3) {
       drawLine({
-        p1: vec2(w, HEIGHT),
-        p2: vec2(w, HEIGHT / 1.2 - 180 * Math.sin(w / 75)),
+        p1: vec2(point, HEIGHT),
+        p2: vec2(point, HEIGHT - Terrain.points[point]),
         width: 3,
-        color: rgb(255, 0, 0)
+        color: rgb(250, 50, 50)
       });
     }
   }, "drawTerrain");
-  var tCollision = /* @__PURE__ */ __name(() => {
-    for (let w = 0; w < WIDTH; w += 16) {
-      add([
-        pos(w, HEIGHT / 1.2 - 180 * Math.sin(w / 75)),
-        rect(8, 15),
-        area(),
-        color(255, 255, 0),
-        anchor("top"),
-        opacity(0),
-        "ground"
-      ]);
-    }
-  }, "tCollision");
 
   // code/main.ts
   var WIDTH = 1920;
@@ -4209,7 +4206,7 @@ vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
     onDraw(() => {
       drawTerrain();
     });
-    tCollision();
+    Terrain.seedTerrain();
     onLoad(() => {
       add([
         pos(250, 250),
@@ -4263,11 +4260,11 @@ vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
       ]);
     }, "newBullet");
     const angle = add([
-      text(Math.floor(bean.angle)),
+      text(Math.floor(bean.angle).toString()),
       pos(24, 24)
     ]);
     const power = add([
-      text(Math.floor(bean.power)),
+      text(Math.floor(bean.power).toString()),
       pos(100, 24)
     ]);
     onKeyDown("space", () => {
@@ -4277,8 +4274,8 @@ vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
       }
     });
     onUpdate(() => {
-      angle.text = Math.abs(Math.floor(bean.angle));
-      power.text = Math.floor(bean.power);
+      angle.text = Math.abs(Math.floor(bean.angle)).toString();
+      power.text = Math.floor(bean.power).toString();
     });
     let rotationSpeed = bean.SPEED_HIGH;
     onKeyDown("alt", () => {

@@ -1,21 +1,29 @@
 import {WIDTH, HEIGHT} from "./main.js"
 
-let points = seedTerrain();
-interpolateLinear(points);
-
-const seedTerrain = () => {
-  //generate random amplitudes every n pixels across width
-  //interpolate linearly between points
-  //return the array of points for drawTerrain
-}
-
-const interpolateLinear = (array) => {
-  return interpolatedArray;
+export const Terrain = {
+  points: [],
+  seedTerrain: function () {
+    //generate random amplitudes every n pixels across width
+    //interpolate linearly between points
+    //return the array of points for drawTerrain
+    for (let w = 0; w < WIDTH; w++){
+      this.points[w] = Math.floor(Math.random() * 1080);
+    }
+  },
+  interpolateLinear: function (array) {
+    //return interpolatedArray;
+  }
 }
 
 export const drawTerrain = () => {
-  
-  for (let point = 0; point < )
+  for (let point = 0; point < WIDTH; point += 3) {
+    drawLine({
+      p1: vec2(point, HEIGHT),
+      p2: vec2(point, HEIGHT - Terrain.points[point]),
+      width: 3,
+      color: rgb(250, 50, 50)
+    })
+  }
 }
 
 /*

@@ -1,6 +1,6 @@
 import kaboom from "kaboom"
 import "kaboom/global"
-import {drawTerrain, tCollision} from "./terrain-generate.js"
+import {drawTerrain, Terrain/*, tCollision*/} from "./terrain-generate.js"
 
 export const WIDTH = 1920
 export const HEIGHT = 1080
@@ -16,10 +16,6 @@ const recording = record()
 
 onKeyDown(".", () => {
   recording.download({filename: "recording"})
-})
-
-onKeyDown(".", () => {
-  download({dataurl: screenshot()})
 })
 */
 
@@ -74,7 +70,8 @@ scene("practice", () => {
     drawTerrain()
   })
 
-  tCollision()
+  //tCollision()
+  Terrain.seedTerrain()
   
   onLoad(() => {
     add([
