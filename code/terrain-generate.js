@@ -1,33 +1,24 @@
 import {WIDTH, HEIGHT} from "./main.js"
 
-export const drawTerrain = () => {
-  for (let w = 0; w < WIDTH; w += 3){
-    drawLine({
-      p1: vec2(w, HEIGHT),
-      p2: vec2(w, HEIGHT/1.2 - 180*Math.sin(w/75)),
-      width: 3,
-      color: rgb(255, 0, 0)
-    })
-  }
+let points = seedTerrain();
+interpolateLinear(points);
+
+const seedTerrain = () => {
+  //generate random amplitudes every n pixels across width
+  //interpolate linearly between points
+  //return the array of points for drawTerrain
 }
 
-/*let tPoints = []
+const interpolateLinear = (array) => {
+  return interpolatedArray;
+}
 
 export const drawTerrain = () => {
-  if (tPoints.length == 0){
-    tPoints.push(vec2(0))
-    for (let w = 0; w < WIDTH; w += 3){
-      tPoints.push(vec2(w,-HEIGHT/2 - 180*Math.sin(w/75)))
-    }
-    tPoints.push(vec2(WIDTH,0))
-  }
-  drawPolygon({
-    pts: tPoints,
-    fill: true,
-    pos: vec2(0, HEIGHT)
-  })
-}*/ //fill component for this method seems to function unexpectedly so discontinued
+  
+  for (let point = 0; point < )
+}
 
+/*
 export const tCollision = () => {
   for (let w = 0; w < WIDTH; w += 16){
     add([
@@ -40,4 +31,4 @@ export const tCollision = () => {
       "ground"
     ])
   }
-}
+} forget about this feature until we can get randomized terrain drawn*/
