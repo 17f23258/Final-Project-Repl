@@ -4147,8 +4147,8 @@ vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
   var Terrain = {
     points: [],
     rndRes: 192,
-    variance: 500,
-    minY: 700,
+    variance: 750,
+    minY: 100,
     seedTerrain: function() {
       for (let w = 0; w <= WIDTH; w += this.rndRes) {
         this.points[w] = Math.floor(Math.random() * this.variance + this.minY);
@@ -4163,18 +4163,31 @@ vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
           this.points[p] = (p - point) * dy / this.rndRes + current;
         }
       }
+    },
+    tCollision: function() {
+      for (let point = 0; point < this.points.length; point += 20) {
+        add([
+          pos(point, HEIGHT - this.points[point]),
+          rect(8, 35),
+          area(),
+          anchor("top"),
+          opacity(0),
+          "ground"
+        ]);
+      }
+    },
+    drawTerrain: function() {
+      for (let point = 0; point < WIDTH; point += 3) {
+        drawLine({
+          p1: vec2(point + 2, HEIGHT),
+          p2: vec2(point + 2, HEIGHT - Terrain.points[point]),
+          width: 3,
+          color: rgb(250, 50, 50)
+        });
+      }
     }
   };
-  var drawTerrain = /* @__PURE__ */ __name(() => {
-    for (let point = 0; point < WIDTH; point += 3) {
-      drawLine({
-        p1: vec2(point + 2, HEIGHT),
-        p2: vec2(point + 2, HEIGHT - Terrain.points[point]),
-        width: 3,
-        color: rgb(250, 50, 50)
-      });
-    }
-  }, "drawTerrain");
+  var terrain_generate_default = Terrain;
 
   // code/main.ts
   var WIDTH = 1920;
@@ -4215,10 +4228,11 @@ vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
   __name(addBtn, "addBtn");
   scene("practice", () => {
     onDraw(() => {
-      drawTerrain();
+      terrain_generate_default.drawTerrain();
     });
-    Terrain.seedTerrain();
-    Terrain.interpolateLinear();
+    terrain_generate_default.seedTerrain();
+    terrain_generate_default.interpolateLinear();
+    terrain_generate_default.tCollision();
     onLoad(() => {
       add([
         pos(250, 250),
@@ -4228,7 +4242,7 @@ vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
     });
     const bean = add([
       sprite("bean"),
-      pos(80, HEIGHT / 1.2 - 180 * Math.sin(80 / 75)),
+      pos(80, HEIGHT - (terrain_generate_default.points[80] + 27)),
       rotate(0),
       anchor("center"),
       {
@@ -4239,7 +4253,7 @@ vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
     ]);
     const target = add([
       sprite("bean"),
-      pos(1500, HEIGHT / 1.2 - 180 * Math.sin(1500 / 75)),
+      pos(1500, HEIGHT - (terrain_generate_default.points[1500] + 27)),
       area(),
       anchor("center")
     ]);
@@ -4262,7 +4276,6 @@ vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
         sprite("bullet"),
         pos(position),
         scale(1, 1),
-        offscreen({ destroy: true }),
         area(),
         anchor("center"),
         body(),
@@ -4288,6 +4301,11 @@ vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
     onUpdate(() => {
       angle.text = Math.abs(Math.floor(bean.angle)).toString();
       power.text = Math.floor(bean.power).toString();
+      if (get("bullet").length > 0) {
+        if (get("bullet")[0].pos.x > WIDTH) {
+          destroyAll("bullet");
+        }
+      }
     });
     let rotationSpeed = bean.SPEED_HIGH;
     onKeyDown("alt", () => {

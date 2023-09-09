@@ -1,6 +1,6 @@
 import kaboom from "kaboom"
 import "kaboom/global"
-import {drawTerrain, Terrain/*, tCollision*/} from "./terrain-generate.js"
+import Terrain from "./terrain-generate.js"
 
 export const WIDTH = 1920
 export const HEIGHT = 1080
@@ -67,12 +67,12 @@ function addBtn(txt, p, f) {
 scene("practice", () => {
 
   onDraw(() => {
-    drawTerrain()
+    Terrain.drawTerrain()
   })
 
-  //tCollision()
   Terrain.seedTerrain()
   Terrain.interpolateLinear()
+  Terrain.tCollision()
   
   onLoad(() => {
     add([
@@ -84,7 +84,7 @@ scene("practice", () => {
 
   const bean = add([
     sprite("bean"),
-    pos(80, HEIGHT/1.2 - 180*Math.sin(80/75)),
+    pos(80, HEIGHT - (Terrain.points[80] + 27)),
     rotate(0),
     anchor("center"),
     {
@@ -96,7 +96,7 @@ scene("practice", () => {
 
   const target = add([
     sprite("bean"),
-    pos(1500, HEIGHT/1.2 - 180*Math.sin(1500/75)),
+    pos(1500, HEIGHT - (Terrain.points[1500] + 27)),
     area(),
     anchor("center")
   ])
@@ -123,7 +123,7 @@ scene("practice", () => {
       sprite("bullet"),
       pos(position),
       scale(1, 1),
-      offscreen({ destroy: true }),
+      //offscreen({ destroy: true }),
       area(),
       anchor("center"),
       body(),
@@ -153,6 +153,12 @@ scene("practice", () => {
   onUpdate(() => {
     angle.text = Math.abs(Math.floor(bean.angle)).toString()  //Update player angle UI
     power.text = Math.floor(bean.power).toString()
+
+    if (get("bullet").length > 0) {
+      if (get("bullet")[0].pos.x > WIDTH) {
+        destroyAll("bullet")
+      }
+    }
   })
 
   let rotationSpeed = bean.SPEED_HIGH
