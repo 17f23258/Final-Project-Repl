@@ -72,6 +72,7 @@ scene("practice", () => {
 
   //tCollision()
   Terrain.seedTerrain()
+  Terrain.interpolateLinear()
   
   onLoad(() => {
     add([

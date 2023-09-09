@@ -4146,19 +4146,30 @@ vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
   // code/terrain-generate.js
   var Terrain = {
     points: [],
+    rndRes: 192,
+    variance: 500,
+    minY: 700,
     seedTerrain: function() {
-      for (let w = 0; w < WIDTH; w++) {
-        this.points[w] = Math.floor(Math.random() * 1080);
+      for (let w = 0; w <= WIDTH; w += this.rndRes) {
+        this.points[w] = Math.floor(Math.random() * this.variance + this.minY);
       }
     },
-    interpolateLinear: function(array) {
+    interpolateLinear: function() {
+      for (let point = 0; point < this.points.length; point += this.rndRes) {
+        let current = this.points[point];
+        let next = this.points[point + this.rndRes];
+        let dy = next - current;
+        for (let p = point; p < point + this.rndRes; p++) {
+          this.points[p] = (p - point) * dy / this.rndRes + current;
+        }
+      }
     }
   };
   var drawTerrain = /* @__PURE__ */ __name(() => {
     for (let point = 0; point < WIDTH; point += 3) {
       drawLine({
-        p1: vec2(point, HEIGHT),
-        p2: vec2(point, HEIGHT - Terrain.points[point]),
+        p1: vec2(point + 2, HEIGHT),
+        p2: vec2(point + 2, HEIGHT - Terrain.points[point]),
         width: 3,
         color: rgb(250, 50, 50)
       });
@@ -4207,6 +4218,7 @@ vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
       drawTerrain();
     });
     Terrain.seedTerrain();
+    Terrain.interpolateLinear();
     onLoad(() => {
       add([
         pos(250, 250),
