@@ -43,7 +43,7 @@ const Terrain = {
         p1: vec2(point + 2, HEIGHT),
         p2: vec2(point + 2, HEIGHT - Terrain.points[point]),
         width: 3,
-        color: rgb(250, 50, 50)
+        color: rgb(181, 4, 21)
       })
     }/*
     drawLine({

@@ -4182,7 +4182,7 @@ vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
           p1: vec2(point + 2, HEIGHT),
           p2: vec2(point + 2, HEIGHT - Terrain.points[point]),
           width: 3,
-          color: rgb(250, 50, 50)
+          color: rgb(181, 4, 21)
         });
       }
     }
@@ -4195,7 +4195,8 @@ vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
   var GRAVITY = 450;
   po({
     width: WIDTH,
-    height: HEIGHT
+    height: HEIGHT,
+    background: [69, 65, 65]
   });
   setGravity(GRAVITY);
   loadBean();
@@ -4271,11 +4272,19 @@ vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
     onCollide("bullet", "ground", () => {
       destroyAll("bullet");
     });
+    target.onCollide("nuke", () => {
+      addKaboom(target.pos, { scale: 15 });
+      destroy(target);
+      destroyAll("nuke");
+      play("explosion");
+      wait(3, () => {
+        go("practice");
+      });
+    });
     const newBullet = /* @__PURE__ */ __name((position, angle2) => {
       add([
         sprite("bullet"),
         pos(position),
-        scale(1, 1),
         area(),
         anchor("center"),
         body(),
@@ -4350,6 +4359,36 @@ vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
     });
     onKeyRelease("down", () => {
       smooth = 3;
+    });
+    const cheatInputs = ["up", "up", "down", "down", "left", "right", "left", "right", "space"];
+    let inputs = [];
+    const cheatCode = /* @__PURE__ */ __name((key) => {
+      inputs.push(key);
+      if (cheatInputs.slice(0, inputs.length).toString() == inputs.toString()) {
+        if (inputs.length == cheatInputs.length) {
+          inputs = [];
+          dropNuke(0, -300);
+        }
+      } else {
+        inputs = [];
+      }
+    }, "cheatCode");
+    const dropNuke = /* @__PURE__ */ __name((x, y) => {
+      loadSprite("nuke", "/sprites/nuke.png");
+      loadSound("explosion", "/sounds/explosion.mp3");
+      const nuke = add([
+        sprite("nuke"),
+        rotate(target.pos.angle(vec2(x, y))),
+        scale(0.7),
+        pos(x, y),
+        anchor("center"),
+        area(),
+        move(target.pos.angle(vec2(x, y)), 1200),
+        "nuke"
+      ]);
+    }, "dropNuke");
+    onKeyPress((key) => {
+      cheatCode(key);
     });
     onKeyDown("escape", () => {
       go("main-menu");

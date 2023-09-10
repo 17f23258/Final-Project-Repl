@@ -9,6 +9,7 @@ const GRAVITY = 450
 kaboom({
   width: WIDTH,
   height: HEIGHT,
+  background: [69, 65, 65]
 })
 
 /*
@@ -118,11 +119,18 @@ scene("practice", () => {
     destroyAll("bullet")
   })
 
+  target.onCollide("nuke", () => {
+    addKaboom(target.pos, {scale: 15})
+    destroy(target)
+    destroyAll("nuke")
+    play("explosion")
+    wait(3, () => {go("practice")})
+  })
+  
   const newBullet = (position, angle) => {
     add([
       sprite("bullet"),
       pos(position),
-      scale(1, 1),
       //offscreen({ destroy: true }),
       area(),
       anchor("center"),
@@ -219,6 +227,45 @@ scene("practice", () => {
     smooth = 3
   })
 
+  const cheatInputs = ["up","up","down","down","left","right","left","right","space"]
+  let inputs = []
+  const cheatCode = (key) => {
+    inputs.push(key)
+    if (cheatInputs.slice(0,inputs.length).toString() == inputs.toString()) {
+      if (inputs.length == cheatInputs.length){
+        inputs = []
+        dropNuke(0, -300)
+      }
+    }
+    else {
+      inputs = []
+    }
+  }
+
+  const dropNuke = (x, y) => {
+    loadSprite("nuke", "/sprites/nuke.png")
+    loadSound("explosion", "/sounds/explosion.mp3")
+    const nuke = add([
+      sprite("nuke"),
+      rotate(target.pos.angle(vec2(x,y))),
+      scale(0.7),
+      pos(x, y),
+      anchor("center"),
+      area(),
+      move(target.pos.angle(vec2(x,y)), 1200),
+      "nuke"
+    ])
+  }
+  
+  onKeyPress((key) => {
+    cheatCode(key)
+  })
+    
+  /*onKeyPress("up", () => {})
+  onKeyPress("down", () => {})
+  onKeyPress("left", () => {})
+  onKeyPress("right", () => {})*/
+  
   onKeyDown("escape", () => {
     go("main-menu")
   })
