@@ -4202,6 +4202,7 @@ vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
   loadBean();
   loadPedit("barrel", "sprites/barrel.pedit");
   loadPedit("bullet", "sprites/bullet.pedit");
+  loadPedit("arrow", "sprites/arrow.pedit");
   function addBtn(txt, p, f) {
     const btn = add([
       rect(240, 80, { radius: 8 }),
@@ -4227,6 +4228,34 @@ vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
     return btn;
   }
   __name(addBtn, "addBtn");
+  var addWind = /* @__PURE__ */ __name(() => {
+    const minWind = -5;
+    const windVariance = 10;
+    let windForce = minWind + Math.floor(Math.random() * windVariance);
+    add([
+      text(Math.abs(windForce).toString()),
+      pos(176, 24)
+    ]);
+    add([
+      sprite("arrow"),
+      pos(186, 20),
+      rotate(windForce < 0 ? 180 : 0),
+      anchor("center")
+    ]);
+    return windForce;
+  }, "addWind");
+  var newBullet = /* @__PURE__ */ __name((position, angle, power) => {
+    return add([
+      sprite("bullet"),
+      pos(position),
+      area(),
+      anchor("center"),
+      body(),
+      rotate(angle),
+      move(vec2(Math.cos(angle / 180 * Math.PI), Math.sin(angle / 180 * Math.PI)), (power + 20) * 8.3),
+      "bullet"
+    ]);
+  }, "newBullet");
   scene("practice", () => {
     onDraw(() => {
       terrain_generate_default.drawTerrain();
@@ -4234,6 +4263,7 @@ vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
     terrain_generate_default.seedTerrain();
     terrain_generate_default.interpolateLinear();
     terrain_generate_default.tCollision();
+    const wind = addWind();
     onLoad(() => {
       add([
         pos(250, 250),
@@ -4281,18 +4311,6 @@ vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
         go("practice");
       });
     });
-    const newBullet = /* @__PURE__ */ __name((position, angle2) => {
-      add([
-        sprite("bullet"),
-        pos(position),
-        area(),
-        anchor("center"),
-        body(),
-        rotate(angle2),
-        move(vec2(Math.cos(angle2 / 180 * Math.PI), Math.sin(angle2 / 180 * Math.PI)), (bean.power + 20) * 8.3),
-        "bullet"
-      ]);
-    }, "newBullet");
     const angle = add([
       text(Math.floor(bean.angle).toString()),
       pos(24, 24)
@@ -4301,18 +4319,22 @@ vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
       text(Math.floor(bean.power).toString()),
       pos(100, 24)
     ]);
+    let bullet;
     onKeyDown("space", () => {
       if (get("bullet").length == 0) {
         let endOfBarrel = vec2(bean.pos.x + 85 * Math.cos(-0.15 + bean.angle / 180 * Math.PI), bean.pos.y + 92 * Math.sin(-0.15 + bean.angle / 180 * Math.PI));
-        let bullet = newBullet(endOfBarrel, bean.angle);
+        bullet = newBullet(endOfBarrel, bean.angle, bean.power);
       }
     });
     onUpdate(() => {
       angle.text = Math.abs(Math.floor(bean.angle)).toString();
       power.text = Math.floor(bean.power).toString();
       if (get("bullet").length > 0) {
-        if (get("bullet")[0].pos.x > WIDTH) {
-          destroyAll("bullet");
+        if (bullet.pos.x > WIDTH || bullet.pos.x < 0) {
+          destroy(bullet);
+        }
+        if (bullet.pos.y < 300) {
+          bullet.pos.x += wind;
         }
       }
     });

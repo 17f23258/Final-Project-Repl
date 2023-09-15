@@ -25,6 +25,7 @@ setGravity(GRAVITY)
 loadBean()
 loadPedit("barrel", "sprites/barrel.pedit")
 loadPedit("bullet", "sprites/bullet.pedit")
+loadPedit("arrow", "sprites/arrow.pedit")
 
 function addBtn(txt, p, f) {
   // add a parent background object
@@ -65,6 +66,43 @@ function addBtn(txt, p, f) {
 
 }
 
+const addWind = () => {
+  //generate random number (+ or -) for wind force
+  //display wind 
+  //add the force to the bullet either through the move command of the bullet or by detecting when the bullet is high up
+  const minWind = -5
+  const windVariance = 10
+  let windForce = minWind + Math.floor(Math.random() * windVariance)
+  
+  add([
+    text(Math.abs(windForce).toString()),
+    pos(176, 24)
+  ])
+
+  add([
+    sprite("arrow"),
+    pos(186, 20),
+    rotate(windForce < 0 ? 180 : 0),
+    anchor("center")
+  ])
+
+  return windForce
+}
+
+const newBullet = (position, angle, power) => {
+  return add([
+    sprite("bullet"),
+    pos(position),
+    //offscreen({ destroy: true }),
+    area(),
+    anchor("center"),
+    body(),
+    rotate(angle),
+    move(vec2(Math.cos(angle / 180 * Math.PI), Math.sin(angle / 180 *     Math.PI)), (power + 20) * 8.3),              //Calculating movement vector
+    "bullet"
+  ])
+}
+
 scene("practice", () => {
 
   onDraw(() => {
@@ -74,6 +112,7 @@ scene("practice", () => {
   Terrain.seedTerrain()
   Terrain.interpolateLinear()
   Terrain.tCollision()
+  const wind = addWind()
   
   onLoad(() => {
     add([
@@ -126,20 +165,6 @@ scene("practice", () => {
     play("explosion")
     wait(3, () => {go("practice")})
   })
-  
-  const newBullet = (position, angle) => {
-    add([
-      sprite("bullet"),
-      pos(position),
-      //offscreen({ destroy: true }),
-      area(),
-      anchor("center"),
-      body(),
-      rotate(angle),
-      move(vec2(Math.cos(angle / 180 * Math.PI), Math.sin(angle / 180 * Math.PI)), (bean.power + 20) * 8.3),              //Calculating movement vector
-      "bullet"
-    ])
-  }
 
   const angle = add([            //UI for displaying the angle of player
     text(Math.floor(bean.angle).toString()),
@@ -151,10 +176,11 @@ scene("practice", () => {
     pos(100, 24)
   ])
 
+  let bullet
   onKeyDown("space", () => {
     if (get("bullet").length == 0) {
       let endOfBarrel = vec2(bean.pos.x + 85 * Math.cos(-0.15 + bean.angle / 180 * Math.PI), bean.pos.y + 92 * Math.sin(-0.15 + bean.angle / 180 * Math.PI)) //Find the position of the end of the barrel to add bullets
-      let bullet = newBullet(endOfBarrel, bean.angle)
+      bullet = newBullet(endOfBarrel, bean.angle, bean.power)
     }
   })
 
@@ -163,8 +189,11 @@ scene("practice", () => {
     power.text = Math.floor(bean.power).toString()
 
     if (get("bullet").length > 0) {
-      if (get("bullet")[0].pos.x > WIDTH) {
-        destroyAll("bullet")
+      if (bullet.pos.x > WIDTH || bullet.pos.x < 0) {
+        destroy(bullet)
+      }
+      if (bullet.pos.y < 300) {
+        bullet.pos.x += wind
       }
     }
   })

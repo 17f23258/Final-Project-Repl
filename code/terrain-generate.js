@@ -20,7 +20,7 @@ const Terrain = {
       let next = this.points[point + this.rndRes];
       let dy = next - current;
       for (let p = point; p < point + this.rndRes; p++) {
-        this.points[p] = (p - point) * (dy) / this.rndRes + current;
+        this.points[p] = (p - point) * dy / this.rndRes + current;
       }
     }
   },
