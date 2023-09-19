@@ -4223,14 +4223,15 @@ vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
     });
     btn.onHoverEnd(() => {
       btn.scale = vec2(1);
+      setCursor("default");
     });
     btn.onClick(f);
     return btn;
   }
   __name(addBtn, "addBtn");
   var addWind = /* @__PURE__ */ __name(() => {
-    const minWind = -5;
-    const windVariance = 10;
+    const minWind = -2;
+    const windVariance = 5;
     let windForce = minWind + Math.floor(Math.random() * windVariance);
     add([
       text(Math.abs(windForce).toString()),
@@ -4344,6 +4345,18 @@ vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
     });
     onKeyRelease("alt", () => {
       rotationSpeed = bean.SPEED_HIGH;
+    });
+    onKeyDown("a", () => {
+      if (bean.pos.x > 0) {
+        bean.pos.x--;
+        bean.pos.y = HEIGHT - terrain_generate_default.points[bean.pos.x] - 27;
+      }
+    });
+    onKeyDown("d", () => {
+      if (bean.pos.x < WIDTH / 3) {
+        bean.pos.x++;
+        bean.pos.y = HEIGHT - terrain_generate_default.points[bean.pos.x] - 27;
+      }
     });
     onKeyDown("left", () => {
       if (bean.angle > -70) {

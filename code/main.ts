@@ -1,5 +1,5 @@
-import kaboom from "kaboom"
 import "kaboom/global"
+import kaboom from "kaboom"
 import Terrain from "./terrain-generate.js"
 
 export const WIDTH = 1920
@@ -56,6 +56,7 @@ function addBtn(txt, p, f) {
   // it runs once when the object stopped being hovered
   btn.onHoverEnd(() => {
     btn.scale = vec2(1)
+    setCursor("default")
   })
 
   // onClick() comes from area() component
@@ -70,8 +71,8 @@ const addWind = () => {
   //generate random number (+ or -) for wind force
   //display wind 
   //add the force to the bullet either through the move command of the bullet or by detecting when the bullet is high up
-  const minWind = -5
-  const windVariance = 10
+  const minWind = -2
+  const windVariance = 5
   let windForce = minWind + Math.floor(Math.random() * windVariance)
   
   add([
@@ -208,6 +209,20 @@ scene("practice", () => {
     rotationSpeed = bean.SPEED_HIGH  //Normal when alt released
   })
 
+  onKeyDown("a", () => {
+    if (bean.pos.x > 0) {
+      bean.pos.x--
+      bean.pos.y = HEIGHT - Terrain.points[bean.pos.x] - 27 
+    }
+  })
+  
+  onKeyDown("d", () => {
+    if (bean.pos.x < WIDTH / 3) {
+      bean.pos.x++
+      bean.pos.y = HEIGHT - Terrain.points[bean.pos.x] - 27
+    }
+  })
+  
   onKeyDown("left", () => {
     if (bean.angle > -70) {
       bean.angle += -rotationSpeed * dt() //Rotate left
