@@ -4208,7 +4208,7 @@ vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
       rect(240, 80, { radius: 8 }),
       pos(p),
       area(),
-      scale(1),
+      scale(1.7),
       anchor("center"),
       outline(4)
     ]);
@@ -4218,11 +4218,11 @@ vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
       color(0, 0, 0)
     ]);
     btn.onHoverUpdate(() => {
-      btn.scale = vec2(1.2);
+      btn.scale = vec2(2.04);
       setCursor("pointer");
     });
     btn.onHoverEnd(() => {
-      btn.scale = vec2(1);
+      btn.scale = vec2(1.7);
       setCursor("default");
     });
     btn.onClick(f);
@@ -4257,6 +4257,28 @@ vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
       "bullet"
     ]);
   }, "newBullet");
+  var player = make([
+    sprite("bean"),
+    pos(),
+    rotate(0),
+    anchor("center"),
+    {
+      SPEED_HIGH: 150,
+      SPEED_LOW: 45,
+      power: 0
+    }
+  ]);
+  var player2 = make([
+    sprite("bean"),
+    pos(),
+    rotate(0),
+    anchor("center"),
+    {
+      SPEED_HIGH: 150,
+      SPEED_LOW: 45,
+      power: 0
+    }
+  ]);
   scene("practice", () => {
     onDraw(() => {
       terrain_generate_default.drawTerrain();
@@ -4267,22 +4289,14 @@ vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
     const wind = addWind();
     onLoad(() => {
       add([
-        pos(250, 250),
+        pos(WIDTH / 2, 450),
         text('Press "esc" to return to menu'),
-        lifespan(2, { fade: 0.5 })
+        lifespan(2, { fade: 0.5 }),
+        anchor("center")
       ]);
     });
-    const bean = add([
-      sprite("bean"),
-      pos(80, HEIGHT - (terrain_generate_default.points[80] + 27)),
-      rotate(0),
-      anchor("center"),
-      {
-        SPEED_HIGH: 150,
-        SPEED_LOW: 45,
-        power: 0
-      }
-    ]);
+    const bean = add(player);
+    bean.pos = vec2(80, HEIGHT - terrain_generate_default.points[80] - 27);
     const target = add([
       sprite("bean"),
       pos(1500, HEIGHT - (terrain_generate_default.points[1500] + 27)),
@@ -4429,20 +4443,32 @@ vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
       go("main-menu");
     });
   });
+  scene("multiplayer", () => {
+    terrain_generate_default.seedTerrain();
+    terrain_generate_default.interpolateLinear();
+    const player_1 = add(player);
+    player_1.pos = vec2(80, HEIGHT - terrain_generate_default.points[80] - 27);
+    const player_2 = add(player2);
+    player_2.pos = vec2(1500, HEIGHT - terrain_generate_default.points[1500] - 27);
+    onDraw(() => {
+      terrain_generate_default.drawTerrain();
+    });
+  });
   scene("multiplayer-menu", () => {
-    addBtn("Join Game", vec2(250, 150), () => {
+    addBtn("Join Game", vec2(WIDTH / 2, HEIGHT / 4), () => {
     });
-    addBtn("Create Game", vec2(250, 250), () => {
+    addBtn("Create Game", vec2(WIDTH / 2, 450), () => {
+      go("multiplayer");
     });
-    addBtn("Return", vec2(250, 350), () => {
+    addBtn("Return", vec2(WIDTH / 2, 630), () => {
       go("main-menu");
     });
   });
   scene("main-menu", () => {
-    addBtn("Practice", vec2(250, 250), () => {
+    addBtn("Practice", vec2(WIDTH / 2, HEIGHT / 4), () => {
       go("practice");
     });
-    addBtn("Multiplayer", vec2(250, 350), () => {
+    addBtn("Multiplayer", vec2(WIDTH / 2, 450), () => {
       go("multiplayer-menu");
     });
   });

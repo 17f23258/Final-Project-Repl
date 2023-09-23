@@ -33,7 +33,7 @@ function addBtn(txt, p, f) {
     rect(240, 80, { radius: 8 }),
     pos(p),
     area(),
-    scale(1),
+    scale(1.7),
     anchor("center"),
     outline(4),
   ])
@@ -48,14 +48,14 @@ function addBtn(txt, p, f) {
   // onHoverUpdate() comes from area() component
   // it runs every frame when the object is being hovered
   btn.onHoverUpdate(() => {
-    btn.scale = vec2(1.2)
+    btn.scale = vec2(2.04)
     setCursor("pointer")
   })
 
   // onHoverEnd() comes from area() component
   // it runs once when the object stopped being hovered
   btn.onHoverEnd(() => {
-    btn.scale = vec2(1)
+    btn.scale = vec2(1.7)
     setCursor("default")
   })
 
@@ -104,6 +104,42 @@ const newBullet = (position, angle, power) => {
   ])
 }
 
+/*const player = make([
+  sprite("bean"),
+  pos(80, HEIGHT - (Terrain.points[80] + 27)),
+  rotate(0),
+  anchor("center"),
+  {
+    SPEED_HIGH: 150,
+    SPEED_LOW: 45,
+    power: 0
+  }
+])*/
+
+const player = make([
+  sprite("bean"),
+  pos(),
+  rotate(0),
+  anchor("center"),
+  {
+    SPEED_HIGH: 150,
+    SPEED_LOW: 45,
+    power: 0
+  }
+])
+
+const player2 = make([
+  sprite("bean"),
+  pos(),
+  rotate(0),
+  anchor("center"),
+  {
+    SPEED_HIGH: 150,
+    SPEED_LOW: 45,
+    power: 0
+  }
+])
+
 scene("practice", () => {
 
   onDraw(() => {
@@ -117,23 +153,15 @@ scene("practice", () => {
   
   onLoad(() => {
     add([
-      pos(250, 250),
+      pos(WIDTH / 2, 450),
       text("Press \"esc\" to return to menu"),
-      lifespan(2, { fade: 0.5 })
+      lifespan(2, { fade: 0.5 }),
+      anchor("center")
     ])
   })
 
-  const bean = add([
-    sprite("bean"),
-    pos(80, HEIGHT - (Terrain.points[80] + 27)),
-    rotate(0),
-    anchor("center"),
-    {
-      SPEED_HIGH: 150,
-      SPEED_LOW: 45,
-      power: 0
-    }
-  ])
+  const bean = add(player)
+  bean.pos = vec2(80, HEIGHT - Terrain.points[80] - 27)
 
   const target = add([
     sprite("bean"),
@@ -316,15 +344,31 @@ scene("practice", () => {
 
 })
 
+scene("multiplayer", () => {
+  
+  Terrain.seedTerrain()
+  Terrain.interpolateLinear()
+
+  const player_1 = add(player)
+  player_1.pos = vec2(80, HEIGHT - Terrain.points[80] - 27)
+
+  const player_2 = add(player2)
+  player_2.pos = vec2(1500, HEIGHT - Terrain.points[1500] - 27)
+
+  onDraw(() => {
+    Terrain.drawTerrain()
+  })
+})
+
 scene("multiplayer-menu", () => {
-  addBtn("Join Game", vec2(250, 150), () => { })
-  addBtn("Create Game", vec2(250, 250), () => { })
-  addBtn("Return", vec2(250, 350), () => { go("main-menu") })
+  addBtn("Join Game", vec2(WIDTH / 2, HEIGHT / 4), () => { })
+  addBtn("Create Game", vec2(WIDTH / 2, 450), () => { go("multiplayer") })
+  addBtn("Return", vec2(WIDTH / 2, 630), () => { go("main-menu") })
 })
 
 scene("main-menu", () => {
-  addBtn("Practice", vec2(250, 250), () => { go("practice") })
-  addBtn("Multiplayer", vec2(250, 350), () => { go("multiplayer-menu") })
+  addBtn("Practice", vec2(WIDTH / 2, HEIGHT / 4), () => {go("practice")})
+  addBtn("Multiplayer", vec2(WIDTH / 2, 450), () => {go("multiplayer-menu")})
 })
 
 go("main-menu")
