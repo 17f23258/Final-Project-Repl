@@ -4229,9 +4229,7 @@ vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
     return btn;
   }
   __name(addBtn, "addBtn");
-  var addWind = /* @__PURE__ */ __name(() => {
-    const minWind = -2;
-    const windVariance = 5;
+  var addWind = /* @__PURE__ */ __name((minWind, windVariance) => {
     let windForce = minWind + Math.floor(Math.random() * windVariance);
     add([
       text(Math.abs(windForce).toString()),
@@ -4260,22 +4258,32 @@ vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
   var player = make([
     sprite("bean"),
     pos(),
+    area(),
     rotate(0),
     anchor("center"),
     {
       SPEED_HIGH: 150,
       SPEED_LOW: 45,
+      ROTATE_MIN: -70,
+      ROTATE_MAX: 0,
+      POS_MIN: 0,
+      POS_MAX: WIDTH / 3,
       power: 0
     }
   ]);
   var player2 = make([
     sprite("bean"),
     pos(),
+    area(),
     rotate(0),
     anchor("center"),
     {
       SPEED_HIGH: 150,
       SPEED_LOW: 45,
+      ROTATE_MIN: 0,
+      ROTATE_MAX: 70,
+      POS_MIN: 2 * WIDTH / 3,
+      POS_MAX: WIDTH,
       power: 0
     }
   ]);
@@ -4286,7 +4294,7 @@ vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
     terrain_generate_default.seedTerrain();
     terrain_generate_default.interpolateLinear();
     terrain_generate_default.tCollision();
-    const wind = addWind();
+    const wind = addWind(-2, 5);
     onLoad(() => {
       add([
         pos(WIDTH / 2, 450),
@@ -4297,6 +4305,8 @@ vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
     });
     const bean = add(player);
     bean.pos = vec2(80, HEIGHT - terrain_generate_default.points[80] - 27);
+    bean.power = 0;
+    bean.angle = 0;
     const target = add([
       sprite("bean"),
       pos(1500, HEIGHT - (terrain_generate_default.points[1500] + 27)),
@@ -4312,7 +4322,9 @@ vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
       addKaboom(target.pos);
       destroy(target);
       destroyAll("bullet");
-      go("practice");
+      wait(1.1, () => {
+        go("practice");
+      });
     });
     onCollide("bullet", "ground", () => {
       destroyAll("bullet");
@@ -4361,13 +4373,13 @@ vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
       rotationSpeed = bean.SPEED_HIGH;
     });
     onKeyDown("a", () => {
-      if (bean.pos.x > 0) {
+      if (bean.pos.x > bean.POS_MIN) {
         bean.pos.x--;
         bean.pos.y = HEIGHT - terrain_generate_default.points[bean.pos.x] - 27;
       }
     });
     onKeyDown("d", () => {
-      if (bean.pos.x < WIDTH / 3) {
+      if (bean.pos.x < bean.POS_MAX) {
         bean.pos.x++;
         bean.pos.y = HEIGHT - terrain_generate_default.points[bean.pos.x] - 27;
       }
@@ -4443,15 +4455,161 @@ vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
       go("main-menu");
     });
   });
-  scene("multiplayer", () => {
-    terrain_generate_default.seedTerrain();
-    terrain_generate_default.interpolateLinear();
-    const player_1 = add(player);
-    player_1.pos = vec2(80, HEIGHT - terrain_generate_default.points[80] - 27);
-    const player_2 = add(player2);
-    player_2.pos = vec2(1500, HEIGHT - terrain_generate_default.points[1500] - 27);
+  scene("multiplayer", (currentTurn = 1, score = [0, 0], newLevel = true) => {
+    const getEndOfBarrel = /* @__PURE__ */ __name((player3) => {
+      if (player3 === player_1) {
+        return vec2(player3.pos.x + 85 * Math.cos(-0.15 + player3.angle / 180 * Math.PI), player3.pos.y + 92 * Math.sin(-0.15 + player3.angle / 180 * Math.PI));
+      } else {
+        return vec2(player3.pos.x - 85 * Math.cos(-0.15 + player3.angle / 180 * Math.PI), player3.pos.y - 92 * Math.sin(0.2 + player3.angle / 180 * Math.PI));
+      }
+    }, "getEndOfBarrel");
     onDraw(() => {
       terrain_generate_default.drawTerrain();
+    });
+    if (newLevel) {
+      terrain_generate_default.seedTerrain();
+      terrain_generate_default.interpolateLinear();
+    }
+    terrain_generate_default.tCollision();
+    let wind = addWind(-3, 6);
+    onLoad(() => {
+      add([
+        pos(WIDTH / 2, 450),
+        text('Press "esc" to return to menu'),
+        lifespan(2, { fade: 0.5 }),
+        anchor("center")
+      ]);
+    });
+    const player_1 = add(player);
+    if (newLevel)
+      player_1.pos = vec2(80, HEIGHT - terrain_generate_default.points[80] - 27);
+    player_1.add([
+      sprite("barrel"),
+      scale(3, 3),
+      pos(0, -60)
+    ]);
+    const player_2 = add(player2);
+    if (newLevel)
+      player_2.pos = vec2(1500, HEIGHT - terrain_generate_default.points[1500] - 27);
+    player_2.add([
+      sprite("barrel"),
+      scale(3, 3),
+      pos(0, -65),
+      rotate(180),
+      anchor("botleft")
+    ]);
+    let currentPlayer = currentTurn == 1 ? player_1 : player_2;
+    currentPlayer.power = 0;
+    currentPlayer.angle = 0;
+    onCollide("bullet", "ground", () => {
+      destroyAll("bullet");
+      go("multiplayer", currentPlayer === player_1 ? 2 : 1, score, false);
+    });
+    player_1.onCollide("bullet", () => {
+      addKaboom(player_1.pos);
+      destroy(player_1);
+      destroyAll("bullet");
+      wait(1.1, () => {
+        go("multiplayer", 1, [score[0], score[1] + 1]);
+      });
+    });
+    player_2.onCollide("bullet", () => {
+      addKaboom(player_2.pos);
+      destroy(player_2);
+      destroyAll("bullet");
+      wait(1.1, () => {
+        go("multiplayer", 2, [score[0] + 1, score[1]]);
+      });
+    });
+    const angle = add([
+      text(Math.floor(currentPlayer.angle).toString()),
+      pos(24, 24)
+    ]);
+    const power = add([
+      text(Math.floor(currentPlayer.power).toString()),
+      pos(100, 24)
+    ]);
+    const scoreCount = add([
+      text(score[0] + " : " + score[1]),
+      pos(WIDTH / 2, 24)
+    ]);
+    onUpdate(() => {
+      angle.text = Math.abs(Math.floor(currentPlayer.angle)).toString();
+      power.text = Math.floor(currentPlayer.power).toString();
+      if (get("bullet").length > 0) {
+        if (bullet.pos.x > WIDTH || bullet.pos.x < 0) {
+          destroy(bullet);
+          go("multiplayer", currentPlayer === player_1 ? 2 : 1, score, false);
+        }
+        if (bullet.pos.y < 300) {
+          bullet.pos.x += wind;
+        }
+      }
+    });
+    let rotationSpeed = player.SPEED_HIGH;
+    onKeyDown("alt", () => {
+      rotationSpeed = player.SPEED_LOW;
+    });
+    onKeyRelease("alt", () => {
+      rotationSpeed = player.SPEED_HIGH;
+    });
+    onKeyDown("left", () => {
+      if (currentPlayer.angle > currentPlayer.ROTATE_MIN) {
+        currentPlayer.angle -= rotationSpeed * dt();
+      } else {
+        currentPlayer.angle = currentPlayer.ROTATE_MIN;
+      }
+    });
+    onKeyDown("right", () => {
+      if (currentPlayer.angle < currentPlayer.ROTATE_MAX) {
+        currentPlayer.angle += rotationSpeed * dt();
+      } else {
+        currentPlayer.angle = currentPlayer.ROTATE_MAX;
+      }
+    });
+    let smooth = 3;
+    onKeyDown("up", () => {
+      smooth += 1.2 * dt();
+      if (currentPlayer.power < 100) {
+        currentPlayer.power += 0.7 * __pow(smooth, 2) * dt();
+      } else {
+        currentPlayer.power = 100;
+      }
+    });
+    onKeyRelease("up", () => {
+      smooth = 3;
+    });
+    onKeyDown("down", () => {
+      smooth += 1.2 * dt();
+      if (currentPlayer.power > 1) {
+        currentPlayer.power -= 0.7 * __pow(smooth, 2) * dt();
+      } else {
+        currentPlayer.power = 0;
+      }
+    });
+    onKeyRelease("down", () => {
+      smooth = 3;
+    });
+    let bullet;
+    onKeyDown("space", () => {
+      if (get("bullet").length == 0) {
+        bullet = newBullet(getEndOfBarrel(currentPlayer), currentPlayer.angle, currentPlayer === player_1 ? currentPlayer.power : currentPlayer.power * -1 - 40);
+      }
+    });
+    onKeyDown("a", () => {
+      if (currentPlayer.pos.x > currentPlayer.POS_MIN) {
+        currentPlayer.pos.x--;
+        currentPlayer.pos.y = HEIGHT - terrain_generate_default.points[currentPlayer.pos.x] - 27;
+      }
+    });
+    onKeyDown("d", () => {
+      if (currentPlayer.pos.x < currentPlayer.POS_MAX) {
+        currentPlayer.pos.x++;
+        currentPlayer.pos.y = HEIGHT - terrain_generate_default.points[currentPlayer.pos.x] - 27;
+      }
+    });
+    onKeyDown("escape", () => {
+      go("main-menu");
     });
   });
   scene("multiplayer-menu", () => {
@@ -4469,7 +4627,7 @@ vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
       go("practice");
     });
     addBtn("Multiplayer", vec2(WIDTH / 2, 450), () => {
-      go("multiplayer-menu");
+      go("multiplayer");
     });
   });
   go("main-menu");
