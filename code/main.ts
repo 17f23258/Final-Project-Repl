@@ -405,8 +405,10 @@ scene("multiplayer", (currentTurn = 1, score = [0,0], newLevel = true) => {
   ])
 
   let currentPlayer = currentTurn == 1 ? player_1 : player_2
-  currentPlayer.power = 0
-  currentPlayer.angle = 0
+  if (newLevel) {
+    currentPlayer.power = 0
+    currentPlayer.angle = 0
+  }
   
   onCollide("bullet", "ground", () => {
     destroyAll("bullet")

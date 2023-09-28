@@ -4499,8 +4499,10 @@ vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
       anchor("botleft")
     ]);
     let currentPlayer = currentTurn == 1 ? player_1 : player_2;
-    currentPlayer.power = 0;
-    currentPlayer.angle = 0;
+    if (newLevel) {
+      currentPlayer.power = 0;
+      currentPlayer.angle = 0;
+    }
     onCollide("bullet", "ground", () => {
       destroyAll("bullet");
       go("multiplayer", currentPlayer === player_1 ? 2 : 1, score, false);
