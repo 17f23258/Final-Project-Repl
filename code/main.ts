@@ -409,10 +409,13 @@ scene("multiplayer", (currentTurn = 1, score = [0,0], newLevel = true) => {
     currentPlayer.power = 0
     currentPlayer.angle = 0
   }
+
+  let awaitTurn = false
   
   onCollide("bullet", "ground", () => {
     destroyAll("bullet")
-    go("multiplayer", currentPlayer === player_1 ? 2 : 1, score, false)
+    awaitTurn = true
+    wait(0.7, () => {go("multiplayer", currentPlayer === player_1 ? 2 : 1, score, false)})
   })
 
   player_1.onCollide("bullet", () => {
@@ -519,7 +522,7 @@ scene("multiplayer", (currentTurn = 1, score = [0,0], newLevel = true) => {
 
   let bullet
   onKeyDown("space", () => {
-    if (get("bullet").length == 0) {
+    if (get("bullet").length == 0 && !awaitTurn) {
       bullet = newBullet(getEndOfBarrel(currentPlayer), currentPlayer.angle, currentPlayer === player_1 ? currentPlayer.power : (currentPlayer.power * -1 - 40))
     }
   })

@@ -4503,9 +4503,13 @@ vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
       currentPlayer.power = 0;
       currentPlayer.angle = 0;
     }
+    let awaitTurn = false;
     onCollide("bullet", "ground", () => {
       destroyAll("bullet");
-      go("multiplayer", currentPlayer === player_1 ? 2 : 1, score, false);
+      awaitTurn = true;
+      wait(0.7, () => {
+        go("multiplayer", currentPlayer === player_1 ? 2 : 1, score, false);
+      });
     });
     player_1.onCollide("bullet", () => {
       addKaboom(player_1.pos);
@@ -4594,7 +4598,7 @@ vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
     });
     let bullet;
     onKeyDown("space", () => {
-      if (get("bullet").length == 0) {
+      if (get("bullet").length == 0 && !awaitTurn) {
         bullet = newBullet(getEndOfBarrel(currentPlayer), currentPlayer.angle, currentPlayer === player_1 ? currentPlayer.power : currentPlayer.power * -1 - 40);
       }
     });
