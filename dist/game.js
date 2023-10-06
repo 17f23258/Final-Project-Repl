@@ -4198,6 +4198,7 @@ vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
     height: HEIGHT,
     background: [69, 65, 65]
   });
+  var recording = record();
   setGravity(GRAVITY);
   loadBean();
   loadPedit("barrel", "sprites/barrel.pedit");
@@ -4616,6 +4617,9 @@ vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
     });
     onKeyDown("escape", () => {
       go("main-menu");
+    });
+    onKeyDown(".", () => {
+      recording.download();
     });
   });
   scene("multiplayer-menu", () => {

@@ -12,9 +12,10 @@ kaboom({
   background: [69, 65, 65]
 })
 
-/*
+
 const recording = record()
 
+/*
 onKeyDown(".", () => {
   recording.download({filename: "recording"})
 })
@@ -378,12 +379,14 @@ scene("multiplayer", (currentTurn = 1, score = [0,0], newLevel = true) => {
   let wind = addWind(-3, 6)
 
   onLoad(() => {
-    add([
-      pos(WIDTH / 2, 450),
-      text("Press \"esc\" to return to menu"),
-      lifespan(2, { fade: 0.5 }),
-      anchor("center")
-    ])
+    if (newLevel) {
+      add([
+        pos(WIDTH / 2, 450),
+        text("Press \"esc\" to return to menu"),
+        lifespan(2, { fade: 0.5 }),
+        anchor("center")
+      ]) 
+    }
   })
   
   const player_1 = add(player)
@@ -543,6 +546,10 @@ scene("multiplayer", (currentTurn = 1, score = [0,0], newLevel = true) => {
   
   onKeyDown("escape", () => {
     go("main-menu")
+  })
+
+  onKeyDown(".", () => {
+    recording.download()
   })
   
 })
