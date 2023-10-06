@@ -12,10 +12,9 @@ kaboom({
   background: [69, 65, 65]
 })
 
-
+/*
 const recording = record()
 
-/*
 onKeyDown(".", () => {
   recording.download({filename: "recording"})
 })
@@ -548,10 +547,11 @@ scene("multiplayer", (currentTurn = 1, score = [0,0], newLevel = true) => {
     go("main-menu")
   })
 
+  /*
   onKeyDown(".", () => {
     recording.download()
   })
-  
+  */
 })
 
 scene("multiplayer-menu", () => {
